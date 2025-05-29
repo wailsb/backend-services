@@ -1,44 +1,48 @@
 // src/v1/models/user.model.ts
-import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/sequelize';
+import { DataTypes, Model, Optional } from 'sequelize';
 
-export interface IUserAttributes {
-  id?: number;
+// Define user attributes
+export interface UserAttributes {
+  id: string;
   username: string;
   email: string;
   passwordHash: string;
-  role?: 'admin' | 'user';
+  role: 'admin' | 'user';
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export class User extends Model<IUserAttributes> implements IUserAttributes {
-  public id!: number;
+// For creation (id is usually generated)
+interface UserCreationAttributes extends Optional<UserAttributes, 'id'> {}
+
+// Define User model
+export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+  public id!: string;
   public username!: string;
   public email!: string;
   public passwordHash!: string;
   public role!: 'admin' | 'user';
-
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
 }
 
+// Init schema
 User.init(
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
+      type: DataTypes.UUID,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
     },
     username: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING,
       allowNull: false,
     },
     email: {
-      type: DataTypes.STRING(150),
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-      validate: { isEmail: true },
     },
     passwordHash: {
       type: DataTypes.STRING,
@@ -47,11 +51,13 @@ User.init(
     role: {
       type: DataTypes.ENUM('admin', 'user'),
       defaultValue: 'user',
+      allowNull: false,
     },
   },
   {
     sequelize,
-    tableName: 'users',
     modelName: 'User',
+    tableName: 'users',
+    timestamps: true,
   }
 );
