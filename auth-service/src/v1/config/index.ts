@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 
-dotenv.config(); // Load variables from .env
+dotenv.config({path:".env"}); // Load variables from .env
 // Appconfig interface
 export interface AppConfig {
   port: number;

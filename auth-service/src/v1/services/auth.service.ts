@@ -19,11 +19,11 @@ async function verifyToken(token: string): Promise<User | null> {
     return null;
   }
 }
-async function getUserById(userId: string): Promise<User[] | null> {
-    const users = await User.findAll({
+async function getUserById(userId: string): Promise<User | null> {
+    const user = await User.findOne({
         where: { id: userId },
     });
-    return users.length > 0 ? users : null;
+    return user ? user : null;
 }
 async function getUserByEmail(email: string): Promise<User | null> {
     const user = await User.findOne({
