@@ -3,6 +3,7 @@ import { RefreshToken} from "../models/refreshToken.model";
 import { CreationAttributes, WhereOptions } from "sequelize";
 import {verifyJwtToken} from "../utils/jwt";
 import { MyJwtPayload } from "../types";
+const bcrypt = require('bcryptjs');
 async function verifyToken(token: string): Promise<User | null> {
   try {
     const decoded: MyJwtPayload | null = await verifyJwtToken(token);  // explicitly typed
@@ -40,6 +41,21 @@ async function createUser(userData: CreationAttributes<User>): Promise<number> {
     }
     return 2;
   }
+}
+async function ValidateUserData(email: string,password: string): Promise<number> {
+    try {
+        if (!email || !password) {
+            return 1; // Missing fields
+        }
+        const existingUser = await User.findOne({ where: { email } });
+        if (existingUser && await bcrypt.compare(password, existingUser.passwordHash)) {
+            return 0; // Valid
+        }
+    } catch (error) {
+        console.error("Error validating user data:", error);
+        return 2; // Error
+    }
+    return 3; // Error
 }
 async function updateUser(userId: string, userData: Partial<CreationAttributes<User>>): Promise<number> {
     try {
@@ -94,9 +110,11 @@ async function filterByAnyParams(params: WhereOptions<User>): Promise<User[] | n
     });
     return users.length > 0 ? users : null;
 }
+
 export {
     verifyToken,
     getUserById,
+    ValidateUserData,
     getUserByEmail,
     createUser,
     updateUser,
